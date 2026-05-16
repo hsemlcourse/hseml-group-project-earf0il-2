@@ -1,0 +1,41 @@
+# Two-service stack: FastAPI inference backend + Streamlit frontend.
+# Run from repo root:  docker compose -f deploy/docker-compose.yml up --build
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    image: svhn-api:latest
+    container_name: svhn-api
+    ports:
+      - "8000:8000"
+    environment:
+      MODEL_PATH: /app/models/resnet_like_final.keras
+      META_PATH: /app/data/meta
+      TF_CPP_MIN_LOG_LEVEL: "2"
+    volumes:
+      # Mount trained model and meta read-only.
+      - ../models:/app/models:ro
+      - ../data/meta:/app/data/meta:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.ui
+    image: svhn-ui:latest
+    container_name: svhn-ui
+    ports:
+      - "8501:8501"
+    environment:
+      API_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped

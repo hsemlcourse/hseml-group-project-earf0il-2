@@ -1,0 +1,26 @@
+# Build context hygiene — exclude everything except what the services need.
+.git
+.gitignore
+.github
+.vscode
+.idea
+.venv
+venv
+env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.ipynb_checkpoints
+notebooks/
+presentation/
+report/
+reports/
+data/raw
+data/processed
+*.log
+.DS_Store
+# Keep models/ and data/meta/ at build time? — They are mounted via compose, so exclude.
+data/data_train
+data/data_test
